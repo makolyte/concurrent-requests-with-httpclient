@@ -13,7 +13,7 @@ namespace ConcurrentRequestsExampleClient
 		private readonly string GetRandomNumberUrl;
 		private SemaphoreSlim semaphore;
 		private long circuitStatus;
-		private const long OPEN = 0;
+		private const long CLOSED = 0;
 		private const long TRIPPED = 1;
 		public string UNAVAILABLE = "Unavailable";
 
@@ -26,7 +26,7 @@ namespace ConcurrentRequestsExampleClient
 			SetMaxConcurrency(url, maxConcurrentRequests);
 			semaphore = new SemaphoreSlim(maxConcurrentRequests);
 
-			circuitStatus = OPEN;
+			circuitStatus = CLOSED;
 		}
 
 		private void SetMaxConcurrency(string url, int maxConcurrentRequests)
@@ -34,16 +34,16 @@ namespace ConcurrentRequestsExampleClient
 			ServicePointManager.FindServicePoint(new Uri(url)).ConnectionLimit = maxConcurrentRequests;
 		}
 
-		public void OpenCircuit()
+		public void CloseCircuit()
 		{
-			if (Interlocked.CompareExchange(ref circuitStatus, OPEN, TRIPPED) == TRIPPED)
+			if (Interlocked.CompareExchange(ref circuitStatus, CLOSED, TRIPPED) == TRIPPED)
 			{
 				Console.WriteLine("Opened circuit");
 			}
 		}
 		private void TripCircuit(string reason)
 		{
-			if (Interlocked.CompareExchange(ref circuitStatus, TRIPPED, OPEN) == OPEN)
+			if (Interlocked.CompareExchange(ref circuitStatus, TRIPPED, CLOSED) == CLOSED)
 			{
 				Console.WriteLine($"Tripping circuit because: {reason}");
 			}
