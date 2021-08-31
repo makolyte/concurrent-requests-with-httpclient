@@ -38,7 +38,7 @@ namespace ConcurrentRequestsExampleClient
 		{
 			if (Interlocked.CompareExchange(ref circuitStatus, CLOSED, TRIPPED) == TRIPPED)
 			{
-				Console.WriteLine("Opened circuit");
+				Console.WriteLine("Closed circuit");
 			}
 		}
 		private void TripCircuit(string reason)
