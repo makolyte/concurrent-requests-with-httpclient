@@ -21,17 +21,17 @@ namespace ConcurrentRequestsExampleClient
 		{
 			GetRandomNumberUrl = $"{url}/RandomNumber/";
 
-			HttpClient = new HttpClient();
+			var socketsHttpHandler = new SocketsHttpHandler()
+			{
+				MaxConnectionsPerServer = maxConcurrentRequests
+			};
+
+			HttpClient = new HttpClient(socketsHttpHandler);
 			HttpClient.Timeout = TimeSpan.FromSeconds(timeoutSeconds);
-			SetMaxConcurrency(url, maxConcurrentRequests);
+
 			semaphore = new SemaphoreSlim(maxConcurrentRequests);
 
 			circuitStatus = CLOSED;
-		}
-
-		private void SetMaxConcurrency(string url, int maxConcurrentRequests)
-		{
-			ServicePointManager.FindServicePoint(new Uri(url)).ConnectionLimit = maxConcurrentRequests;
 		}
 
 		public void CloseCircuit()
